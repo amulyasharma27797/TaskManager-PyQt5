@@ -20,10 +20,10 @@ class Tab(QDialog):
         vbox = QVBoxLayout()
         tab_widget = QTabWidget()
 
-        tab_widget.addTab(NetworkWindow(), "Network")
         tab_widget.addTab(Window(), "CPU Monitor")
         tab_widget.addTab(TaskManager(), "Processes")
         tab_widget.addTab(MemoryWindow(), "Memory")
+        tab_widget.addTab(NetworkWindow(), "Network")
 
         vbox.addWidget(tab_widget)
 
