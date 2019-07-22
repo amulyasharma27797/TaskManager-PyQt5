@@ -113,11 +113,13 @@ class MemoryWindow(QWidget):
 
         label = QLabel("Memory")
         label.setFont(QtGui.QFont("Sanserif", 10))
+
         vbox_inner.addWidget(label)
 
         self.c = str(self.a.mem_per)
         self.label1 = QLabel(self.c, self)  # Updating memory % values
         self.label1.setFont(QtGui.QFont("Courier", 10))
+
         vbox_inner.addWidget(self.label1)
 
         hbox1.addLayout(vbox_inner)

@@ -14,7 +14,7 @@ class Tab(QDialog):
 
         # Setting up the window title and geometry
         self.setWindowTitle("System Monitor")
-        self.setGeometry(200, 50, 900, 600)
+        self.setGeometry(100, 50, 1165, 600)
         self.setWindowFlags(self.windowFlags() & QtCore.Qt.WindowMinMaxButtonsHint)  # Displaying Max and Min Buttons
 
         vbox = QVBoxLayout()

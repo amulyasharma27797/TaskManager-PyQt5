@@ -6,12 +6,13 @@ class Network(FigureCanvas):
     """Setting up the matplotlib for showing up the figure"""
 
     def __init__(self):
+        self.arr = list()
 
         self.old_sent_bytes = self.get_network_usage().bytes_sent  # Getting the bytes sent when the program initiates
         self.old_recv_bytes = self.get_network_usage().bytes_recv  # Getting the bytes recv when the program initiates
 
         self.fig = Figure()
-        # self.fig.subplots_adjust()
+        self.fig.subplots_adjust(left=0.05)
 
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.yaxis.tick_right()
@@ -20,12 +21,11 @@ class Network(FigureCanvas):
         self.ax1.yaxis.set_label_position("right")
         self.ax1.grid(True)
 
+        self.ax1.set_xlim(60, 0)
+        self.ax1.set_ylim(0, 60)
+
         # initialization of the canvas
         FigureCanvas.__init__(self, self.fig)
-
-        # set X and Y Axis limits
-        self.ax1.set_xlim(60, 0)
-        self.ax1.set_ylim(0, 30)
 
         # Generating empty plots
         self.sent_bytes_difference, self.recv_bytes_difference, self.bytes_sent, self.bytes_recv = [], [], [], []
@@ -59,26 +59,43 @@ class Network(FigureCanvas):
         """This event gets triggered whenever startTimer() is called"""
 
         self.new_sent_bytes = self.get_network_usage().bytes_sent  # Getting current sent bytes
-        result_sent_bytes = self.new_sent_bytes - self.old_sent_bytes  # Obtaining the difference in sent bytes
+        self.result_sent_bytes = self.new_sent_bytes - self.old_sent_bytes  # Obtaining the difference in sent bytes
         self.old_sent_bytes = self.new_sent_bytes  # Setting new bytes value to old bytes
 
         self.new_recv_bytes = self.get_network_usage().bytes_recv  # Getting current recv bytes
-        result_recv_bytes = self.new_recv_bytes - self.old_recv_bytes  # Obtaining the difference in recv bytes
+        self.result_recv_bytes = self.new_recv_bytes - self.old_recv_bytes  # Obtaining the difference in recv bytes
         self.old_recv_bytes = self.new_recv_bytes  # Setting new bytes value to old bytes
 
-        self.diff_sent = result_sent_bytes
-        self.diff_recv = result_recv_bytes / 1024
+        self.diff_sent = self.result_sent_bytes
+        self.diff_recv = self.result_recv_bytes / 1024
 
         self.bytes_sent = self.new_sent_bytes / 1048576
         self.bytes_recv = self.new_recv_bytes / 1073741824
 
-        self.sent_bytes_difference.insert(0, (result_sent_bytes/1024))
-        self.recv_bytes_difference.insert(0, (result_recv_bytes/1024))
+        self.sent_bytes_difference.insert(0, (self.result_sent_bytes/1024))
+        self.recv_bytes_difference.insert(0, (self.result_recv_bytes/1024))
+
+        self.set_y_axes()  # Dynamic Axes
 
         self.sent_network.set_data(range(len(self.sent_bytes_difference)), self.sent_bytes_difference)
         self.recv_network.set_data(range(len(self.recv_bytes_difference)), self.recv_bytes_difference)
 
         self.fig.canvas.draw()
+
+    def set_y_axes(self):
+        """Dynamically setting up Y-Axis according to the speed"""
+
+        self.arr.append(self.result_recv_bytes/1024)
+        k = 60
+        n = len(self.arr)
+
+        if len(self.arr) > k:
+
+            l = [self.arr[i] for i in range(k)]
+            for i in range(n-k):
+                l.pop(0)
+                l.append(self.arr[i+k])
+            self.ax1.set_ylim(0, max(l))
 
 
 class NetworkWindow(QWidget):

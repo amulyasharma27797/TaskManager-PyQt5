@@ -143,7 +143,7 @@ class Window(QWidget):
 
         hbox = QHBoxLayout()
         hbox_inner = QHBoxLayout()
-        hbox_inner.setContentsMargins(50, 0, 0, 0)
+        hbox_inner.setContentsMargins(100, 0, 0, 0)
 
         # Core 1 Label
         label = QLabel(self)  # Showing red color
