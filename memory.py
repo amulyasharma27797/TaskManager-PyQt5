@@ -101,7 +101,7 @@ class MemoryWindow(QWidget):
         vbox.addWidget(self.a)
 
         hbox1 = QHBoxLayout()
-        hbox1.setContentsMargins(100, 0, 0, 0)
+        hbox1.setContentsMargins(200, 0, 0, 0)
 
         # 1st label for Memory
         label = QLabel(self)  # Showing red color

@@ -45,6 +45,11 @@ class TaskManager(QMainWindow):
         self.b1 = QPushButton()
         self.l1 = QLabel()
         self.s1 = QSlider(Qt.Horizontal)
+
+        header = self.form_widget.horizontalHeader()
+        for i in range(len(self.col_headers)):
+            header.setSectionResizeMode(i, QtWidgets.QHeaderView.Stretch)
+
         self.timer.start(1000)
 
     @QtCore.pyqtSlot()
@@ -230,7 +235,11 @@ class TaskManager(QMainWindow):
         info_cursor.movePosition(QtGui.QTextCursor.NextCell)
         info_cursor.insertText("System up time: {}".format(datetime.datetime.now() - datetime.datetime.fromtimestamp(psutil.boot_time())))
         info_cursor.movePosition(QtGui.QTextCursor.NextCell)
-        info_cursor.insertText("Memory Usage: {}%".format(psutil.virtual_memory().percent))
+        info_cursor.insertText("Memory Usage: {}%. ({} used out of {})".format(psutil.virtual_memory().percent,
+                                                                               get_formatted_memory(
+                                                                                   psutil.virtual_memory().used),
+                                                                               get_formatted_memory(
+                                                                                   psutil.virtual_memory().total)))
         info_cursor.movePosition(QtGui.QTextCursor.NextCell)
         info_cursor.insertText("CPU Usage: {}%".format(psutil.cpu_percent()))
         info_cursor.movePosition(QtGui.QTextCursor.NextCell)
@@ -270,14 +279,7 @@ class TaskManager(QMainWindow):
 
     def show_info(self, process):
         info_dialog = QDialog()
-        l1 = QLabel()
-        l2 = QLabel()
-        l3 = QLabel()
-        l4 = QLabel()
-        l5 = QLabel()
-        l6 = QLabel()
-        l7 = QLabel()
-        l8 = QLabel()
+        l1, l2, l3, l4, l5, l6, l7, l8 = (QLabel() for i in range(8))
 
         info_dialog.setWindowTitle(process.name())
         l1.setText(str("Process ID: {}".format(process.pid)))
