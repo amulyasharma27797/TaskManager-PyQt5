@@ -12,7 +12,8 @@ class Network(FigureCanvas):
     def __init__(self):
         self.arr = list()
         self.dq = deque()
-
+        self.k = 11
+        self.j = 0
         self.old_sent_bytes = self.get_network_usage().bytes_sent  # Getting the bytes sent when the program initiates
         self.old_recv_bytes = self.get_network_usage().bytes_recv  # Getting the bytes recv when the program initiates
 
@@ -22,11 +23,10 @@ class Network(FigureCanvas):
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.yaxis.tick_right()
         self.ax1.set_xlabel("Seconds")
-        # self.ax1.set_ylabel("KiB/s")
         self.ax1.yaxis.set_label_position("right")
         self.ax1.grid(True)
 
-        self.ax1.set_xlim(60, 0)
+        self.ax1.set_xlim(self.k, 0)
         self.ax1.set_ylim(0, 60)
 
         # initialization of the canvas
@@ -90,18 +90,20 @@ class Network(FigureCanvas):
 
     def set_y_axes(self):
         """Dynamically setting up Y-Axis according to the speed"""
-
         a = self.get_formatted_ylabel(self.result_recv_bytes)
-        self.arr.append(self.final_recv)  # Getting values of recv bytes per second in an array
-        k = 60
-        n = len(self.arr)
+        # if len(self.arr) >= self.k:
+        #     self.arr.pop(0)
+        #     self.j += 1
 
-        for i in range(n):
-            while self.dq and self.dq[0] <= i - k:
-                self.dq.popleft()
-            while self.dq and self.arr[i] >= self.arr[self.dq[-1]]:
-                self.dq.pop()
-            self.dq.append(i)
+        self.arr.append(self.final_recv)  # Getting values of recv bytes per second in an array
+        n = len(self.arr)
+        i = n-1
+
+        while self.dq and self.dq[0] <= i - self.k:
+            self.dq.popleft()
+        while self.dq and self.arr[i] >= self.arr[self.dq[-1]]:
+            self.dq.pop()
+        self.dq.append(i)
 
         self.ax1.set_ylim(0, math.ceil(float(self.arr[self.dq[0]]) / 50) * 50)
         self.ax1.set_ylabel(a)
@@ -241,6 +243,3 @@ class NetworkWindow(QWidget):
             return "%.2f KBps" % (memory_in_bytes / 1024)
         else:
             return str(memory_in_bytes) + ' Bps'
-
-
-
