@@ -10,13 +10,14 @@ class CPU(FigureCanvas):
 
         # first image setup and setting y-ticks to the right
         self.fig = Figure()
-        self.fig.subplots_adjust(hspace=0.5, left=0.05)
+        self.fig.subplots_adjust(hspace=0.7, left=0.05)
 
         self.ax1 = self.fig.add_subplot(221)
         self.ax1.yaxis.tick_right()
         self.ax1.set_xlabel("Seconds")
         self.ax1.set_ylabel("%")
         self.ax1.yaxis.set_label_position("right")
+        self.ax1.set_title("Core 1")
         self.ax1.grid(True)
 
         self.ax2 = self.fig.add_subplot(222)
@@ -24,6 +25,7 @@ class CPU(FigureCanvas):
         self.ax2.set_xlabel("Seconds")
         self.ax2.set_ylabel("%")
         self.ax2.yaxis.set_label_position("right")
+        self.ax2.set_title("Core 2")
         self.ax2.grid(True)
 
         self.ax3 = self.fig.add_subplot(223)
@@ -31,6 +33,7 @@ class CPU(FigureCanvas):
         self.ax3.set_xlabel("Seconds")
         self.ax3.set_ylabel("%")
         self.ax3.yaxis.set_label_position("right")
+        self.ax3.set_title("Core 3")
         self.ax3.grid(True)
 
         self.ax4 = self.fig.add_subplot(224)
@@ -38,6 +41,7 @@ class CPU(FigureCanvas):
         self.ax4.set_xlabel("Seconds")
         self.ax4.set_ylabel("%")
         self.ax4.yaxis.set_label_position("right")
+        self.ax4.set_title("Core 4")
         self.ax4.grid(True)
 
         # initialization of the canvas
@@ -151,9 +155,9 @@ class Window(QWidget):
         label.setFixedSize(15, 15)
         hbox_inner.addWidget(label)
 
-        label = QLabel("Core 1")  # Label (CPU 1)
+        label = QLabel("Core 1: ")  # Label (CPU 1)
         label.setFont(QtGui.QFont("Sanserif", 12))
-        label.setFixedSize(55, 20)
+        label.setFixedSize(56, 20)
         hbox_inner.addWidget(label)
 
         self.c = str(self.a.var1)
@@ -167,9 +171,9 @@ class Window(QWidget):
         label.setFixedSize(15, 15)
         hbox_inner.addWidget(label)
 
-        label = QLabel("Core 2")
+        label = QLabel("Core 2: ")
         label.setFont(QtGui.QFont("Sanserif", 12))
-        label.setFixedSize(55, 20)
+        label.setFixedSize(56, 20)
         hbox_inner.addWidget(label)
 
         self.c = str(self.a.var2)
@@ -183,9 +187,9 @@ class Window(QWidget):
         label.setFixedSize(15, 15)
         hbox_inner.addWidget(label)
 
-        label = QLabel("Core 3")
+        label = QLabel("Core 3: ")
         label.setFont(QtGui.QFont("Sanserif", 12))
-        label.setFixedSize(55, 20)
+        label.setFixedSize(56, 20)
         hbox_inner.addWidget(label)
 
         self.c = str(self.a.var3)
@@ -199,9 +203,9 @@ class Window(QWidget):
         label.setFixedSize(15, 15)
         hbox_inner.addWidget(label)
 
-        label = QLabel("Core 4")
+        label = QLabel("Core 4: ")
         label.setFont(QtGui.QFont("Sanserif", 12))
-        label.setFixedSize(55, 20)
+        label.setFixedSize(56, 20)
         hbox_inner.addWidget(label)
 
         self.c = str(self.a.var4)
