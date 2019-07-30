@@ -6,14 +6,23 @@ from imports import *
 import psutil as p
 
 
+class Node:
+    """Setting up value and index for sliding window"""
+
+    def __init__(self, value, index=None):
+        self.value = value
+        self.index = index
+
+
 class Network(FigureCanvas):
     """Setting up the matplotlib for showing up the figure"""
 
     def __init__(self):
-        self.arr = list()
-        self.dq = deque()
-        self.k = 11
-        self.j = 0
+        self.arr = list()  # Initialising an empty list
+        self.dq = deque()  # Initialising a deque
+        self.window_limit = 60  # Setting up maximum window limit
+        self.elapsed_seconds = 0  # Initialising elapsed seconds
+
         self.old_sent_bytes = self.get_network_usage().bytes_sent  # Getting the bytes sent when the program initiates
         self.old_recv_bytes = self.get_network_usage().bytes_recv  # Getting the bytes recv when the program initiates
 
@@ -26,7 +35,7 @@ class Network(FigureCanvas):
         self.ax1.yaxis.set_label_position("right")
         self.ax1.grid(True)
 
-        self.ax1.set_xlim(self.k, 0)
+        self.ax1.set_xlim(self.window_limit, 0)
         self.ax1.set_ylim(0, 60)
 
         # initialization of the canvas
@@ -69,7 +78,7 @@ class Network(FigureCanvas):
 
         self.new_recv_bytes = self.get_network_usage().bytes_recv  # Getting current recv bytes
         self.result_recv_bytes = self.new_recv_bytes - self.old_recv_bytes  # Obtaining the difference in recv bytes
-        self.final_recv = self.get_formatted_memory(self.result_recv_bytes)
+        self.final_recv = self.get_formatted_speed(self.result_recv_bytes)
         self.old_recv_bytes = self.new_recv_bytes  # Setting new bytes value to old bytes
 
         self.diff_sent = self.result_sent_bytes
@@ -90,43 +99,48 @@ class Network(FigureCanvas):
 
     def set_y_axes(self):
         """Dynamically setting up Y-Axis according to the speed"""
-        a = self.get_formatted_ylabel(self.result_recv_bytes)
-        # if len(self.arr) >= self.k:
-        #     self.arr.pop(0)
-        #     self.j += 1
 
+        self.elapsed_seconds += 1  # Increasing elapsed seconds per iteration
+
+        formatted_y_label = self.get_formatted_ylabel(self.result_recv_bytes)
+
+        if len(self.arr) >= self.window_limit:
+            self.arr.pop(0)
         self.arr.append(self.final_recv)  # Getting values of recv bytes per second in an array
-        n = len(self.arr)
-        i = n-1
+        iter_arr = len(self.arr)-1
 
-        while self.dq and self.dq[0] <= i - self.k:
+        while self.dq and self.dq[0].index <= self.elapsed_seconds - self.window_limit:
             self.dq.popleft()
-        while self.dq and self.arr[i] >= self.arr[self.dq[-1]]:
+        while self.dq and self.arr[iter_arr] >= self.dq[-1].value:
             self.dq.pop()
-        self.dq.append(i)
+        self.dq.append(Node(self.arr[iter_arr], self.elapsed_seconds))
 
-        self.ax1.set_ylim(0, math.ceil(float(self.arr[self.dq[0]]) / 50) * 50)
-        self.ax1.set_ylabel(a)
+        self.ax1.set_ylim(0, math.ceil(float(self.dq[0].value) / 50) * 50)
+        self.ax1.set_ylabel(formatted_y_label)
 
-    def get_formatted_ylabel(self, memory_in_bytes):
-        if memory_in_bytes > 1024 * 1024 * 1024:
+    def get_formatted_ylabel(self, speed_in_bytes):
+        """Showing speed string accordingly"""
+
+        if speed_in_bytes > 1024 * 1024 * 1024:
             return "GBps"
-        elif memory_in_bytes > 1024 * 1024:
+        elif speed_in_bytes > 1024 * 1024:
             return "MBps"
-        elif memory_in_bytes > 1024:
+        elif speed_in_bytes > 1024:
             return "KBps"
         else:
             return "Bytes"
 
-    def get_formatted_memory(self, memory_in_bytes):
-        if memory_in_bytes > 1024 * 1024 * 1024:
-            return memory_in_bytes / (1024 * 1024 * 1024)
-        elif memory_in_bytes > 1024 * 1024:
-            return memory_in_bytes / (1024 * 1024)
-        elif memory_in_bytes > 1024:
-            return memory_in_bytes / 1024
+    def get_formatted_speed(self, speed_in_bytes):
+        """Showing speed accordingly"""
+
+        if speed_in_bytes > 1024 * 1024 * 1024:
+            return speed_in_bytes / (1024 * 1024 * 1024)
+        elif speed_in_bytes > 1024 * 1024:
+            return speed_in_bytes / (1024 * 1024)
+        elif speed_in_bytes > 1024:
+            return speed_in_bytes / 1024
         else:
-            return memory_in_bytes
+            return speed_in_bytes
 
 
 class NetworkWindow(QWidget):
@@ -140,6 +154,7 @@ class NetworkWindow(QWidget):
         self.show()
 
     def create_layout(self):
+        """Creating a layout for Network Window"""
 
         layout = QGridLayout()
         self.setLayout(layout)
@@ -207,7 +222,7 @@ class NetworkWindow(QWidget):
     def received(self):
         """Displaying updated received data"""
 
-        pr = str(self.get_formatted_memory_diff(self.a.diff_recv))
+        pr = str(self.get_formatted_speed_diff(self.a.diff_recv))
         show_pr = ("Recieving\t" + pr)
 
         br = str(self.a.bytes_recv)
@@ -219,7 +234,7 @@ class NetworkWindow(QWidget):
     def sent(self):
         """Displaying updated sent data"""
 
-        ps = str(self.get_formatted_memory_diff(self.a.diff_sent))
+        ps = str(self.get_formatted_speed_diff(self.a.diff_sent))
         show_ps = ("Sending\t\t" + ps)
 
         bs = str(self.a.bytes_sent)
@@ -234,12 +249,14 @@ class NetworkWindow(QWidget):
         self.received()
         self.sent()
 
-    def get_formatted_memory_diff(self, memory_in_bytes):
-        if memory_in_bytes > 1024 * 1024 * 1024:
-            return "%.2f GBps" % (memory_in_bytes / (1024 * 1024 * 1024))
-        elif memory_in_bytes > 1024 * 1024:
-            return "%.2f MBps" % (memory_in_bytes / (1024 * 1024))
-        elif memory_in_bytes > 1024:
-            return "%.2f KBps" % (memory_in_bytes / 1024)
+    def get_formatted_speed_diff(self, speed_in_bytes):
+        """Returning speed accordingly"""
+
+        if speed_in_bytes > 1024 * 1024 * 1024:
+            return "%.2f GBps" % (speed_in_bytes / (1024 * 1024 * 1024))
+        elif speed_in_bytes > 1024 * 1024:
+            return "%.2f MBps" % (speed_in_bytes / (1024 * 1024))
+        elif speed_in_bytes > 1024:
+            return "%.2f KBps" % (speed_in_bytes / 1024)
         else:
-            return str(memory_in_bytes) + ' Bps'
+            return str(speed_in_bytes) + ' Bps'
