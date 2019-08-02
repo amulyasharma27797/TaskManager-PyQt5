@@ -31,9 +31,14 @@ class TaskManager(QMainWindow):
     def __init__(self):
         super().__init__()
         rows = psutil_test.rows
-        self.form_widget = MyTable(rows, 11)
+        if psutil_test.getListOfProcesses()[0].get('shared'):
+            self.col_headers = ['P-ID', 'P-Name', 'User', 'Virt-Mem', 'Res-Mem', 'Shd-Mem', 'Mem %', 'CPU %', 'Path',
+                                'Priority', 'Created']
+        else:
+            self.col_headers = ['P-ID', 'P-Name', 'User', 'Virt-Mem', 'Res-Mem', 'Mem %', 'CPU %', 'Path',
+                                'Priority', 'Created']
+        self.form_widget = MyTable(rows, len(self.col_headers))
         self.setCentralWidget(self.form_widget)
-        self.col_headers = ['P-ID', 'P-Name', 'User', 'Virt-Mem', 'Res-Mem', 'Shd-Mem', 'Mem %', 'CPU %', 'Path', 'Priority', 'Created']
         self.key = 'pid'
         self.flag = False
         self.form_widget.setHorizontalHeaderLabels(self.col_headers)
@@ -65,12 +70,19 @@ class TaskManager(QMainWindow):
             self.form_widget.setItem(i, 2, QTableWidgetItem(str(process['username'])))
             self.form_widget.setItem(i, 3, QTableWidgetItem(get_formatted_memory(process['vms'])))
             self.form_widget.setItem(i, 4, QTableWidgetItem(get_formatted_memory(process['res'])))
-            self.form_widget.setItem(i, 5, QTableWidgetItem(get_formatted_memory(process['shared'])))
-            self.form_widget.setItem(i, 6, QTableWidgetItem("%.2f " % (process['mem_per'])))
-            self.form_widget.setItem(i, 7, QTableWidgetItem(str(process['cpu'])))
-            self.form_widget.setItem(i, 8, QTableWidgetItem(str(process['path'])))
-            self.form_widget.setItem(i, 9, QTableWidgetItem(str(process['priority'])))
-            self.form_widget.setItem(i, 10, QTableWidgetItem(str(datetime.datetime.fromtimestamp(process['time']))))
+            if process.get('shared'):
+                self.form_widget.setItem(i, 5, QTableWidgetItem(get_formatted_memory(process['shared'])))
+                self.form_widget.setItem(i, 6, QTableWidgetItem("%.2f " % (process['mem_per'])))
+                self.form_widget.setItem(i, 7, QTableWidgetItem(str(process['cpu'])))
+                self.form_widget.setItem(i, 8, QTableWidgetItem(str(process['path'])))
+                self.form_widget.setItem(i, 9, QTableWidgetItem(str(process['priority'])))
+                self.form_widget.setItem(i, 10, QTableWidgetItem(str(datetime.datetime.fromtimestamp(process['time']))))
+            else:
+                self.form_widget.setItem(i, 5, QTableWidgetItem("%.2f " % (process['mem_per'])))
+                self.form_widget.setItem(i, 6, QTableWidgetItem(str(process['cpu'])))
+                self.form_widget.setItem(i, 7, QTableWidgetItem(str(process['path'])))
+                self.form_widget.setItem(i, 8, QTableWidgetItem(str(process['priority'])))
+                self.form_widget.setItem(i, 9, QTableWidgetItem(str(datetime.datetime.fromtimestamp(process['time']))))
 
     def contextMenuEvent(self, event):
         context_menu = QMenu(self)
@@ -158,24 +170,21 @@ class TaskManager(QMainWindow):
         'time': "Created"
     }
 
-    col_header_key_header_index = bidict({
-        'pid': 0,
-        'name': 1,
-        'username': 2,
-        'vms': 3,
-        'res': 4,
-        'shared': 5,
-        'mem_per': 6,
-        'cpu': 7,
-        'path': 8,
-        'priority': 9,
-        'time': 10,
-    })
+    keys_dict = ['pid', 'name', 'username', 'vms', 'res', 'mem_per', 'cpu', 'path', 'priority', 'time']
+    if psutil_test.getListOfProcesses()[0].get('shared'):
+        keys_dict.insert(5, 'shared')
+    dicts = dict.fromkeys(keys_dict, None)
+
+    for key, value in dicts.items():
+        dicts[key] = keys_dict.index(key)
+
+    col_header_key_header_index = bidict(dicts)
 
     def change_header_value(self, flag, key):
         for i, header in enumerate(self.col_headers):
             self.form_widget.setHorizontalHeaderItem(i, QTableWidgetItem(str(header)))
-        self.form_widget.setHorizontalHeaderItem(self.col_header_key_header_index.get(key), self._get_widget_item(flag, self.col_header_key_header_name.get(key)))
+        self.form_widget.setHorizontalHeaderItem(self.col_header_key_header_index.get(key),
+                                                 self._get_widget_item(flag, self.col_header_key_header_name.get(key)))
         self.form_widget.horizontalHeader().setDefaultAlignment(Qt.AlignCenter)
 
     def confirm_kill_process(self, process):

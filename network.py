@@ -53,8 +53,8 @@ class Network(FigureCanvas):
         self.fig.canvas.draw()
 
         # initializing empty variables for bytes and packets
-        self.diff_recv = ("Recieving\t" + "0" + " KBps")
-        self.diff_sent = ("Sending\t" + "0" + " Bps")
+        self.diff_recv = 0
+        self.diff_sent = 0
 
         self.bytes_recv = ("Total Received\t" + "0" + " GB")
         self.bytes_sent = ("Total Sent\t" + "0" + " GB")

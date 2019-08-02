@@ -16,7 +16,8 @@ def getListOfProcesses():
             pinfo = proc.as_dict(attrs=['pid', 'name', 'username'])
             pinfo['vms'] = proc.memory_info().vms
             pinfo['res'] = proc.memory_info().rss
-            pinfo['shared'] = proc.memory_info().shared
+            if 'shared' in proc.memory_info()._fields:
+                pinfo['shared'] = proc.memory_info().shared
             pinfo['mem_per'] = proc.memory_percent()
             pinfo['cpu'] = proc.cpu_percent()
             pinfo['path'] = proc.cwd()
