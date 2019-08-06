@@ -112,8 +112,6 @@ class CPU(FigureCanvas):
         self.cpu3.set_data(range(len(self.core3)), self.core3)
         self.cpu4.set_data(range(len(self.core4)), self.core4)
 
-        # mplcursors.cursor(self.cpu1, hover=True)
-
         # force a redraw of the Figure
         self.fig.canvas.draw()
 

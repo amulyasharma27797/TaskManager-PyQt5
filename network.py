@@ -18,7 +18,8 @@ class Network(FigureCanvas):
     """Setting up the matplotlib for showing up the figure"""
 
     def __init__(self):
-        self.arr = list()  # Initialising an empty list
+        self.recv_arr = list()  # Initialising an empty list
+        self.send_arr = list()
         self.dq = deque()  # Initialising a deque
         self.window_limit = 60  # Setting up maximum window limit
         self.elapsed_seconds = 0  # Initialising elapsed seconds
@@ -78,7 +79,6 @@ class Network(FigureCanvas):
 
         self.new_recv_bytes = self.get_network_usage().bytes_recv  # Getting current recv bytes
         self.result_recv_bytes = self.new_recv_bytes - self.old_recv_bytes  # Obtaining the difference in recv bytes
-        self.final_recv = self.get_formatted_speed(self.result_recv_bytes)
         self.old_recv_bytes = self.new_recv_bytes  # Setting new bytes value to old bytes
 
         self.diff_sent = self.result_sent_bytes
@@ -87,13 +87,13 @@ class Network(FigureCanvas):
         self.bytes_sent = self.new_sent_bytes / (1024 * 1024)
         self.bytes_recv = self.new_recv_bytes / (1024 * 1024 * 1024)
 
-        self.sent_bytes_difference.insert(0, (self.result_sent_bytes/1024))
-        self.recv_bytes_difference.insert(0, self.final_recv)
+        if len(self.recv_bytes_difference) > self.window_limit:  # Check that size of list shouldn't exceed window limit
+            self.recv_bytes_difference.pop()
+            self.sent_bytes_difference.pop()
+        self.sent_bytes_difference.insert(0, self.result_sent_bytes)
+        self.recv_bytes_difference.insert(0, self.result_recv_bytes)
 
         self.set_y_axes()  # Dynamic Axes
-
-        self.sent_network.set_data(range(len(self.sent_bytes_difference)), self.sent_bytes_difference)
-        self.recv_network.set_data(range(len(self.recv_bytes_difference)), self.recv_bytes_difference)
 
         self.fig.canvas.draw()
 
@@ -102,21 +102,73 @@ class Network(FigureCanvas):
 
         self.elapsed_seconds += 1  # Increasing elapsed seconds per iteration
 
-        formatted_y_label = self.get_formatted_ylabel(self.result_recv_bytes)
+        if len(self.recv_arr) >= self.window_limit:
+            self.recv_arr.pop(0)
+        self.recv_arr.append(self.result_recv_bytes)  # Getting values of recv bytes per second in an array
+        recv_iter_arr = len(self.recv_arr)-1
+        recv_value = self.recv_arr[recv_iter_arr]
 
-        if len(self.arr) >= self.window_limit:
-            self.arr.pop(0)
-        self.arr.append(self.final_recv)  # Getting values of recv bytes per second in an array
-        iter_arr = len(self.arr)-1
+        if len(self.send_arr) >= self.window_limit:
+            self.send_arr.pop(0)
+        self.send_arr.append(self.result_sent_bytes)  # Getting values of recv bytes per second in an array
+        send_iter_arr = len(self.send_arr)-1
+        send_value = self.send_arr[send_iter_arr]
+
+        self.maintain_max_queue(recv_value)
+        self.maintain_max_queue(send_value)
+
+        dq_value_speed = self.get_formatted_ylabel(self.dq[0].value)  # Speed of max value in window
+
+        self.calculate_speed(dq_value_speed)
+
+        self.ax1.set_ylim(0, math.ceil(float(self.get_formatted_speed(self.dq[0].value)) / 10) * 10)
+
+        self.ax1.set_ylabel(dq_value_speed)
+
+    def maintain_max_queue(self, value):
+        """Maintaining the maximum value in the window"""
 
         while self.dq and self.dq[0].index <= self.elapsed_seconds - self.window_limit:
             self.dq.popleft()
-        while self.dq and self.arr[iter_arr] >= self.dq[-1].value:
+        while self.dq and value >= self.dq[-1].value:
             self.dq.pop()
-        self.dq.append(Node(self.arr[iter_arr], self.elapsed_seconds))
+        self.dq.append(Node(value, self.elapsed_seconds))
 
-        self.ax1.set_ylim(0, math.ceil(float(self.dq[0].value) / 50) * 50)
-        self.ax1.set_ylabel(formatted_y_label)
+    def calculate_speed(self, speed):
+        """Getting the array of speed to be shown in the graph accordingly"""
+
+        temp_recv = list()
+        temp_sent = list()
+        if speed == "Bytes":
+            self.recv_network.set_data(range(len(self.recv_bytes_difference)), self.recv_bytes_difference)
+            self.sent_network.set_data(range(len(self.sent_bytes_difference)), self.sent_bytes_difference)
+        elif speed == "KBps":
+            for val in self.recv_bytes_difference:
+                val = val / 1024
+                temp_recv.append(val)
+                self.recv_network.set_data(range(len(self.recv_bytes_difference)), temp_recv)
+            for val in self.sent_bytes_difference:
+                val = val / 1024
+                temp_sent.append(val)
+                self.sent_network.set_data(range(len(self.sent_bytes_difference)), temp_sent)
+        elif speed == "MBps":
+            for val in self.recv_bytes_difference:
+                val = val / (1024 * 1024)
+                temp_recv.append(val)
+                self.recv_network.set_data(range(len(self.recv_bytes_difference)), temp_recv)
+            for val in self.sent_bytes_difference:
+                val = val / (1024 * 1024)
+                temp_sent.append(val)
+                self.sent_network.set_data(range(len(self.sent_bytes_difference)), temp_sent)
+        else:
+            for val in self.recv_bytes_difference:
+                val = val / (1024 * 1024 * 1024)
+                temp_recv.append(val)
+                self.recv_network.set_data(range(len(self.recv_bytes_difference)), temp_recv)
+            for val in self.sent_bytes_difference:
+                val = val / (1024 * 1024 * 1024)
+                temp_sent.append(val)
+                self.sent_network.set_data(range(len(self.sent_bytes_difference)), temp_sent)
 
     def get_formatted_ylabel(self, speed_in_bytes):
         """Showing speed string accordingly"""
