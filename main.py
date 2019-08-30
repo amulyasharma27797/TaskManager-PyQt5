@@ -15,14 +15,14 @@ class Tab(QDialog):
         # Setting up the window title and geometry
         self.setWindowTitle("System Monitor")
         self.setGeometry(100, 50, 1165, 600)
-        self.setMinimumSize(1000, 600)
+        self.setMinimumSize(1165, 600)
         self.setWindowFlags(self.windowFlags() & QtCore.Qt.WindowMinMaxButtonsHint)  # Displaying Max and Min Buttons
 
         vbox = QVBoxLayout()
         tab_widget = QTabWidget()
 
         tab_widget.addTab(TaskManager(), "Processes")
-	tab_widget.addTab(Window(), "CPU Monitor")
+        tab_widget.addTab(Window(), "CPU Monitor")
         tab_widget.addTab(MemoryWindow(), "Memory")
         tab_widget.addTab(NetworkWindow(), "Network")
 

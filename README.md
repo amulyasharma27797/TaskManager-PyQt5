@@ -14,7 +14,7 @@ This is a Task Manager written in Python using PyQt5.
 1) Install python3 and above using the link:
         - https://realpython.com/installing-python/
         
-2) Clone the project in a directory using the link:
+2) Clone the project in a directory. To know how to clone use the link:
         - https://confluence.atlassian.com/bitbucket/clone-a-repository-223217891.html
    Or Download the Zip file of the project.
         
