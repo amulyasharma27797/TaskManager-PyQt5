@@ -25,28 +25,28 @@ class CPU(FigureCanvas):
                  7: 'y',
                  8: 'burlywood'}
 
-        for i in range(1, cpu_num+1):
+        for val in range(1, cpu_num+1):
             if cpu_num == 4:
-                self.ax = self.fig.add_subplot(2, 2, i)
+                self.ax = self.fig.add_subplot(2, 2, val)
             elif cpu_num == 6:
-                self.ax = self.fig.add_subplot(3, 2, i)
+                self.ax = self.fig.add_subplot(3, 2, val)
             else:
-                self.ax = self.fig.add_subplot(2, 4, i)
+                self.ax = self.fig.add_subplot(2, 4, val)
 
-            self.ax.yaxis.tick_right()
+            self.ax.yaxis.tick_right()  # setting y-ticks to the right
             self.ax.set_xlabel("Seconds")
             self.ax.set_ylabel("%")
-            self.ax.yaxis.set_label_position("right")  # setting y-ticks to the right
-            self.ax.yaxis.set_label_coords(1.15, 0.5)
-            self.ax.set_title("Core " + str(i))
-            self.ax.grid(True)
+            self.ax.yaxis.set_label_position("right")  # setting y-label to the right
+            self.ax.yaxis.set_label_coords(1.15, 0.5)  # setting y-label co-ordinates
+            self.ax.set_title("Core " + str(val))  # setting title for subplots
+            self.ax.grid(True)  # displaying grids in subplots
             self.ax.set_xlim(60, 0)
             self.ax.set_ylim(0, 100)
             self.ax.set_autoscale_on(False)
 
-            self.core[i] = []
-            self.cpu[i], = self.ax.plot([], self.core[i], color=color[i])
-            self.var[i] = 0
+            self.core[val] = []
+            self.cpu[val], = self.ax.plot([], self.core[val], color=color[val])
+            self.var[val] = 0
 
         # initialization of the canvas
         FigureCanvas.__init__(self, self.fig)
@@ -70,10 +70,10 @@ class CPU(FigureCanvas):
         # get the cpu percentage usage
         result = self.get_cpu_percent()
 
-        for i in range(0, len(result)):
-            self.var[i+1] = result[i]
-            self.core[i+1].insert(0, result[i])
-            self.cpu[i+1].set_data(range(len(self.core[i+1])), self.core[i+1])
+        for val in range(0, len(result)):
+            self.var[val+1] = result[val]
+            self.core[val+1].insert(0, result[val])
+            self.cpu[val+1].set_data(range(len(self.core[val+1])), self.core[val+1])
 
         # force a redraw of the Figure
         self.fig.canvas.draw()
@@ -121,21 +121,21 @@ class Window(QWidget):
                  7: 'yellow',
                  8: 'burlywood'}
 
-        for i in range(1, cpu_num+1):
-            self.label[i] = QLabel(self)
-            self.label[i].setStyleSheet("background-color:"+color[i])
-            self.label[i].setFixedSize(15, 15)
-            hbox_inner.addWidget(self.label[i])
+        for val in range(1, cpu_num+1):
+            self.label[val] = QLabel(self)
+            self.label[val].setStyleSheet("background-color:"+color[val])
+            self.label[val].setFixedSize(15, 15)
+            hbox_inner.addWidget(self.label[val])
 
-            self.label[i] = QLabel("Core " + str(i) + ":")
-            self.label[i].setFont(QtGui.QFont("Sanserif", 12))
-            self.label[i].setFixedSize(56, 20)
-            hbox_inner.addWidget(self.label[i])
+            self.label[val] = QLabel("Core " + str(val) + ":")
+            self.label[val].setFont(QtGui.QFont("Sanserif", 12))
+            self.label[val].setFixedSize(56, 20)
+            hbox_inner.addWidget(self.label[val])
 
-            val = str(self.a.var[i])
-            self.label[i] = QLabel(val, self)
-            self.label[i].setFont(QtGui.QFont("Sanserif", 12))
-            hbox_inner.addWidget(self.label[i])
+            value = str(self.a.var[val])
+            self.label[val] = QLabel(value, self)
+            self.label[val].setFont(QtGui.QFont("Sanserif", 12))
+            hbox_inner.addWidget(self.label[val])
 
         hbox.addLayout(hbox_inner)
         vbox.addLayout(hbox)
@@ -147,8 +147,8 @@ class Window(QWidget):
 
         cpu_num = p.cpu_percent(percpu=True).__len__()
 
-        for i in range(1, cpu_num+1):
-            self.label[i].setText(str(self.a.var[i]) + '%')
+        for val in range(1, cpu_num+1):
+            self.label[val].setText(str(self.a.var[val]) + '%')
 
     def timerEvent(self, evt):
         """Calling the update function for updating the CPU % labels"""
