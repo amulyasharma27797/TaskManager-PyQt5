@@ -5,6 +5,7 @@ import psutil_test
 
 
 class MyTable(QTableWidget):
+    """This table provides basic grid layout for the main window."""
     def __init__(self, r, c):
         super().__init__(r, c)
         self.init_ui()
@@ -17,6 +18,12 @@ class MyTable(QTableWidget):
 
 
 def get_formatted_memory(memory_in_bytes):
+    """
+    This function formats the memory
+    in preferred unit based on its size.
+    :param memory_in_bytes:
+    :return:
+    """
     if memory_in_bytes > 1024 * 1024 * 1024:
         return "%.2f GB" % (memory_in_bytes / (1024 * 1024 * 1024))
     elif memory_in_bytes > 1024 * 1024:
@@ -28,6 +35,9 @@ def get_formatted_memory(memory_in_bytes):
 
 
 class TaskManager(QMainWindow):
+    """
+    This is the main window class.
+    """
     def __init__(self):
         super().__init__()
         rows = psutil_test.rows
@@ -59,6 +69,10 @@ class TaskManager(QMainWindow):
 
     @QtCore.pyqtSlot()
     def change_values(self):
+        """
+        This method is used to change the values of processes dynamically.
+        :return:
+        """
 
         new_list = psutil_test.getListOfProcesses()
         final_list = self.sort_list(new_list, self.key, self.flag)  # set value function to be called by button trigger
@@ -85,6 +99,11 @@ class TaskManager(QMainWindow):
                 self.form_widget.setItem(i, 9, QTableWidgetItem(str(datetime.datetime.fromtimestamp(process['time']))))
 
     def contextMenuEvent(self, event):
+        """
+        Method for providing the right click context menu.
+        :param event:
+        :return:
+        """
         context_menu = QMenu(self)
         id = self.form_widget.get_current_id()
         process = psutil.Process(pid=int(id))
@@ -143,14 +162,24 @@ class TaskManager(QMainWindow):
                 self.suspend_process(process)
 
     def sort_list(self, sort_list, key, flag):
+        """
+        This method is used to sort the values in the
+        task manager according on their respective headers.
+        :param sort_list:
+        :param key:
+        :param flag:
+        :return:
+        """
         return sorted(sort_list, key=lambda obj: obj[key], reverse=flag)
 
     def set_values(self, col):
+        """Used to set the values of headers"""
         self.key = self.col_header_key_header_index.inverse.get(col)
         self.flag = not self.flag
         self.change_header_value(self.flag, self.key)
 
     def _get_widget_item(self, flag: bool, name: str):
+        """Puts a sort icon next to the header."""
         if flag:
             return QTableWidgetItem(qta.icon('mdi.arrow-down-drop-circle'), name)
         else:
@@ -181,6 +210,13 @@ class TaskManager(QMainWindow):
     col_header_key_header_index = bidict(dicts)
 
     def change_header_value(self, flag, key):
+        """
+        Puts a sort icon next to the header
+        with the help of _get_widget_item().
+        :param flag:
+        :param key:
+        :return:
+        """
         for i, header in enumerate(self.col_headers):
             self.form_widget.setHorizontalHeaderItem(i, QTableWidgetItem(str(header)))
         self.form_widget.setHorizontalHeaderItem(self.col_header_key_header_index.get(key),
@@ -188,6 +224,11 @@ class TaskManager(QMainWindow):
         self.form_widget.horizontalHeader().setDefaultAlignment(Qt.AlignCenter)
 
     def confirm_kill_process(self, process):
+        """
+        Dialog box for killing a process.
+        :param process:
+        :return:
+        """
         message = QMessageBox.question(self, "Kill Process", "Are you sure you want to kill this process ?",
                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if message == QMessageBox.Yes:
@@ -196,6 +237,11 @@ class TaskManager(QMainWindow):
             pass
 
     def set_custom_priority(self, process):
+        """
+        Dialog box for setting custom priority to processes.
+        :param process:
+        :return:
+        """
         d = QDialog()
         self.b1 = QPushButton("Set Priority", d)
         self.l1 = QLabel()
@@ -221,21 +267,43 @@ class TaskManager(QMainWindow):
         d.exec_()
 
     def slider_change(self):
+        """
+        Slider function for getting custom priority value.
+        :return:
+        """
         value = self.s1.value()
         self.l1.setText(str(value))
 
     def set_priority(self, process):
+        """
+        Used to provide a function object for the signal.
+        :param process:
+        :return:
+        """
         def process_priority():
+            """
+            Actual function used to set process priority.
+            :return:
+            """
             value = self.s1.value()
             process.nice(value)
         return process_priority
 
     def handle_print(self):
+        """
+        Method for handling save as PDF functionality.
+        :return:
+        """
         dialog = QtPrintSupport.QPrintDialog()
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
             self.handle_paint_request(dialog.printer())
 
     def handle_paint_request(self, printer):
+        """
+        saves the information in task manager in a pdf.
+        :param printer:
+        :return:
+        """
         document = QtGui.QTextDocument()
         info_cursor = QtGui.QTextCursor(document)
         info_table = info_cursor.insertTable(5, 1)
@@ -270,7 +338,13 @@ class TaskManager(QMainWindow):
         document.print_(printer)
 
     def suspend_process(self, process):
-        message = QMessageBox.question(self, "Suspend Process", "Are you sure you want to suspend this process for now?",
+        """
+        Method used for suspension of processes.
+        :param process:
+        :return:
+        """
+        message = QMessageBox.question(self, "Suspend Process",
+                                       "Are you sure you want to suspend this process for now?",
                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if message == QMessageBox.Yes:
             process.suspend()
@@ -278,6 +352,11 @@ class TaskManager(QMainWindow):
             pass
 
     def resume_process(self, process):
+        """
+        Method used for resuming processes.
+        :param process:
+        :return:
+        """
         message = QMessageBox.question(self, "Suspend Process",
                                        "Are you sure you want to resume this process now?",
                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -287,6 +366,11 @@ class TaskManager(QMainWindow):
             pass
 
     def show_info(self, process):
+        """
+        Method for showing all related information of the selected process.
+        :param process:
+        :return:
+        """
         info_dialog = QDialog()
         l1, l2, l3, l4, l5, l6, l7, l8 = (QLabel() for i in range(8))
 

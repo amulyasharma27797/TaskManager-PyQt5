@@ -1,13 +1,15 @@
 import sys
 
 from cpu_graph import *
-from task_manager import *
+from processes import *
 from memory import *
 from network import *
 
 
 class Tab(QDialog):
-    """Creating a main Tab for CPU Processes and CPU Graph to be displayed"""
+    """
+    Creating a main Tab for CPU Processes and CPU Graph to be displayed
+    """
 
     def __init__(self):
         super().__init__()

@@ -7,15 +7,18 @@ import psutil as p
 
 
 class Node:
-    """Setting up value and index for sliding window"""
-
+    """
+    Setting up value and index for sliding window
+    """
     def __init__(self, value, index=None):
         self.value = value
         self.index = index
 
 
 class Network(FigureCanvas):
-    """Setting up the matplotlib for showing up the figure"""
+    """
+    Setting up the matplotlib for showing up the figure
+    """
 
     def __init__(self):
         self.recv_arr = list()  # Initialising an empty list
@@ -64,14 +67,21 @@ class Network(FigureCanvas):
         self.timer = self.startTimer(1000)
 
     def get_network_usage(self):
-        """Getting the network usage of all NIC's"""
+        """
+        Getting the network usage of all NIC's
+        :return:
+        """
 
         self.net_io = p.net_io_counters()
 
         return self.net_io
 
     def timerEvent(self, evt):
-        """This event gets triggered whenever startTimer() is called"""
+        """
+        This event gets triggered whenever startTimer() is called
+        :param evt:
+        :return:
+        """
 
         self.new_sent_bytes = self.get_network_usage().bytes_sent  # Getting current sent bytes
         self.result_sent_bytes = self.new_sent_bytes - self.old_sent_bytes  # Obtaining the difference in sent bytes
@@ -98,7 +108,10 @@ class Network(FigureCanvas):
         self.fig.canvas.draw()
 
     def set_y_axes(self):
-        """Dynamically setting up Y-Axis according to the speed"""
+        """
+        Dynamically setting up Y-Axis according to the speed
+        :return:
+        """
 
         self.elapsed_seconds += 1  # Increasing elapsed seconds per iteration
 
@@ -126,7 +139,11 @@ class Network(FigureCanvas):
         self.ax1.set_ylabel(dq_value_speed)
 
     def maintain_max_queue(self, value):
-        """Maintaining the maximum value in the window"""
+        """
+        Maintaining the maximum value in the window
+        :param value:
+        :return:
+        """
 
         while self.dq and self.dq[0].index <= self.elapsed_seconds - self.window_limit:
             self.dq.popleft()
@@ -135,7 +152,11 @@ class Network(FigureCanvas):
         self.dq.append(Node(value, self.elapsed_seconds))
 
     def calculate_speed(self, speed):
-        """Getting the array of speed to be shown in the graph accordingly"""
+        """
+        Getting the array of speed to be shown in the graph accordingly
+        :param speed:
+        :return:
+        """
 
         temp_recv = list()
         temp_sent = list()
@@ -171,7 +192,11 @@ class Network(FigureCanvas):
                 self.sent_network.set_data(range(len(self.sent_bytes_difference)), temp_sent)
 
     def get_formatted_ylabel(self, speed_in_bytes):
-        """Showing speed string accordingly"""
+        """
+        Showing speed string accordingly
+        :param speed_in_bytes:
+        :return:
+        """
 
         if speed_in_bytes > 1024 * 1024 * 1024:
             return "GBps"
@@ -183,7 +208,11 @@ class Network(FigureCanvas):
             return "Bytes"
 
     def get_formatted_speed(self, speed_in_bytes):
-        """Showing speed accordingly"""
+        """
+        Showing speed accordingly
+        :param speed_in_bytes:
+        :return:
+        """
 
         if speed_in_bytes > 1024 * 1024 * 1024:
             return speed_in_bytes / (1024 * 1024 * 1024)
@@ -196,7 +225,9 @@ class Network(FigureCanvas):
 
 
 class NetworkWindow(QWidget):
-    """Main Class for showing the Graph"""
+    """
+    Main Class for showing the Graph
+    """
 
     def __init__(self):
         super().__init__()
@@ -206,7 +237,10 @@ class NetworkWindow(QWidget):
         self.show()
 
     def create_layout(self):
-        """Creating a layout for Network Window"""
+        """
+        Creating a layout for Network Window
+        :return:
+        """
 
         layout = QGridLayout()
         self.setLayout(layout)
@@ -272,7 +306,10 @@ class NetworkWindow(QWidget):
         groupbox.setLayout(vbox)
 
     def received(self):
-        """Displaying updated received data"""
+        """
+        Displaying updated received data
+        :return:
+        """
 
         pr = str(self.get_formatted_speed_diff(self.a.diff_recv))
         show_pr = ("Recieving\t" + pr)
@@ -284,7 +321,10 @@ class NetworkWindow(QWidget):
         self.label2.setText(show_br)
 
     def sent(self):
-        """Displaying updated sent data"""
+        """
+        Displaying updated sent data
+        :return:
+        """
 
         ps = str(self.get_formatted_speed_diff(self.a.diff_sent))
         show_ps = ("Sending\t\t" + ps)
@@ -296,13 +336,21 @@ class NetworkWindow(QWidget):
         self.label4.setText(show_bs)
 
     def timerEvent(self, evt):
-        """Calling the update function for updating the CPU % labels"""
+        """
+        Calling the update function for updating the CPU % labels
+        :param evt:
+        :return:
+        """
 
         self.received()
         self.sent()
 
     def get_formatted_speed_diff(self, speed_in_bytes):
-        """Returning speed accordingly"""
+        """
+        Returning speed accordingly
+        :param speed_in_bytes:
+        :return:
+        """
 
         if speed_in_bytes > 1024 * 1024 * 1024:
             return "%.2f GBps" % (speed_in_bytes / (1024 * 1024 * 1024))

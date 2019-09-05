@@ -3,7 +3,9 @@ import psutil as p
 
 
 class Memory(FigureCanvas):
-    """Setting up the matplotlib for showing up the figure"""
+    """
+    Setting up the matplotlib for showing up the figure
+    """
 
     def __init__(self):
 
@@ -44,21 +46,31 @@ class Memory(FigureCanvas):
         self.timer = self.startTimer(1000)
 
     def memory(self):
-
+        """
+        Getting the virtual memory data
+        :return:
+        """
         # getting values from virtual memory
         self.memory_data = p.virtual_memory()
 
         return self.memory_data
 
     def swap(self):
-
+        """
+        Getting the swap memory data
+        :return:
+        """
         # getting values from swap memory
         self.swap_data = p.swap_memory()
 
         return self.swap_data
 
     def timerEvent(self, evt):
-        """This event gets triggered whenever startTimer() is called"""
+        """
+        This event gets triggered whenever startTimer() is called
+        :param evt:
+        :return:
+        """
 
         memory_result = self.memory()
         swap_result = self.swap()
@@ -77,7 +89,9 @@ class Memory(FigureCanvas):
 
 
 class MemoryWindow(QWidget):
-    """Main Class for showing the Graph"""
+    """
+    Main Class for showing the Graph
+    """
 
     def __init__(self):
         super().__init__()
@@ -87,7 +101,10 @@ class MemoryWindow(QWidget):
         self.show()
 
     def create_layout(self):
-
+        """
+        Creating a layout using PyQt for graph to be displayed
+        :return:
+        """
         layout = QGridLayout()
         self.setLayout(layout)
 
@@ -153,7 +170,10 @@ class MemoryWindow(QWidget):
         groupbox.setLayout(vbox)
 
     def show_memory(self):
-        """Displaying updated memory data in label1"""
+        """
+        Displaying updated memory data in label1
+        :return:
+        """
 
         used = str(self.a.memory().used / 1073741824)
         per = str(self.a.memory().percent)
@@ -164,7 +184,10 @@ class MemoryWindow(QWidget):
         self.label1.setText(str(show))
 
     def show_swap(self):
-        """Displaying updated swap data in label2"""
+        """
+        Displaying updated swap data in label2
+        :return:
+        """
 
         used = str(self.a.swap().used / 1073741824)
         per = str(self.a.swap().percent)
@@ -175,7 +198,11 @@ class MemoryWindow(QWidget):
         self.label2.setText(str(show))
 
     def timerEvent(self, evt):
-        """Calling the update function for updating the CPU % labels"""
+        """
+        Calling the update function for updating the CPU % labels
+        :param evt:
+        :return:
+        """
 
         self.show_memory()
         self.show_swap()

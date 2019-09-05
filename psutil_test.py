@@ -5,7 +5,10 @@ listOfProcObjects = []
 
 
 def getListOfProcesses():
-
+    """
+    Main function to get the list of processes and their information.
+    :return:
+    """
     global listOfProcObjects
     listOfProcObjects = []
 
@@ -33,10 +36,9 @@ def getListOfProcesses():
     # Sort list of dict by key vms i.e. memory usage
     listOfProcObjects = sorted(listOfProcObjects, key=lambda procObj: procObj['vms'])
 
-    # print(listOfProcObjects)
     global rows
     rows = len(listOfProcObjects)
-    # print(rows)
     return listOfProcObjects
+
 
 getListOfProcesses()

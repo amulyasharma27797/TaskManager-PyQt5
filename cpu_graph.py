@@ -4,7 +4,9 @@ import psutil as p
 
 
 class CPU(FigureCanvas):
-    """Setting up the matplotlib for showing up the figure"""
+    """
+    Setting up the matplotlib for showing up the figure
+    """
 
     def __init__(self):
 
@@ -58,7 +60,10 @@ class CPU(FigureCanvas):
         self.timer = self.startTimer(1000)
 
     def get_cpu_percent(self):
-        """Get the CPU percent of each core"""
+        """
+        Get the CPU percent of each core
+        :return:
+        """
 
         # Gives the list of CPU percent per CPU
         self.cpu_percent = p.cpu_percent(percpu=True)
@@ -66,6 +71,11 @@ class CPU(FigureCanvas):
         return self.cpu_percent
 
     def timerEvent(self, evt):
+        """
+        This event gets triggered whenever startTimer() is called
+        :param evt:
+        :return:
+        """
 
         # get the cpu percentage usage
         result = self.get_cpu_percent()
@@ -80,7 +90,9 @@ class CPU(FigureCanvas):
 
 
 class Window(QWidget):
-    """Window for running the CPU application"""
+    """
+    Window for running the CPU application
+    """
 
     def __init__(self):
         super().__init__()
@@ -92,8 +104,11 @@ class Window(QWidget):
         self.show()
 
     def create_layout(self):
-        """Setting up the layout of the window and calling
-            the CPU class for plotting"""
+        """
+        Setting up the layout of the window and calling
+        the CPU class for plotting
+        :return:
+        """
 
         layout = QGridLayout()
         self.setLayout(layout)
@@ -143,7 +158,10 @@ class Window(QWidget):
         groupbox.setLayout(vbox)
 
     def update_cpu(self):
-        """Updating the values of theC CPU cores"""
+        """
+        Updating the values of the CPU cores
+        :return:
+        """
 
         cpu_num = p.cpu_percent(percpu=True).__len__()
 
@@ -151,6 +169,10 @@ class Window(QWidget):
             self.label[val].setText(str(self.a.var[val]) + '%')
 
     def timerEvent(self, evt):
-        """Calling the update function for updating the CPU % labels"""
+        """
+        Calling the update function for updating the CPU % labels
+        :param evt:
+        :return:
+        """
 
         self.update_cpu()
